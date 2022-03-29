@@ -11,7 +11,7 @@ type Employee struct {
 }
 
 type EmployeeCompare struct {
-	Comparator func(i, j int) bool
+	Comparator func(comparator *EmployeeCompare, i, j int) bool
 	Employee   []*Employee
 }
 
@@ -20,7 +20,7 @@ func (emp *EmployeeCompare) Len() int {
 }
 
 func (emp *EmployeeCompare) Less(i, j int) bool {
-	return emp.Comparator(i, j)
+	return emp.Comparator(emp, i, j)
 }
 
 func (emp *EmployeeCompare) Swap(i, j int) {
@@ -64,13 +64,10 @@ func main() {
 
 func sortEmployee(employees []*Employee, comparator func(empCompare *EmployeeCompare, i, j int) bool) {
 
-	comparable := new(EmployeeCompare)
-	comparable.Comparator = func(i, j int) bool {
-		return comparator(comparable, i, j)
-	}
-	comparable.Employee = employees
+	comparable := EmployeeCompare{comparator, employees}
 
-	sort.Sort(comparable)
+	//NOTE: Passing address of EmployeeCompare because
+	sort.Sort(&comparable) //  (* EmployeeCompare) satisfies the interface and not EmployeeCompare
 
 	for _, emp := range employees {
 		fmt.Println(emp.Name, emp.Age)
