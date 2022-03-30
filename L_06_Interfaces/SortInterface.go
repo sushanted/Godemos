@@ -11,7 +11,7 @@ type Employee struct {
 }
 
 type EmployeeCompare struct {
-	Comparator func(comparator *EmployeeCompare, i, j int) bool
+	Comparator func(first, second *Employee) bool
 	Employee   []*Employee
 }
 
@@ -20,19 +20,19 @@ func (emp *EmployeeCompare) Len() int {
 }
 
 func (emp *EmployeeCompare) Less(i, j int) bool {
-	return emp.Comparator(emp, i, j)
+	return emp.Comparator(emp.Employee[i], emp.Employee[j])
 }
 
 func (emp *EmployeeCompare) Swap(i, j int) {
 	emp.Employee[i], emp.Employee[j] = emp.Employee[j], emp.Employee[i]
 }
 
-func (emp *EmployeeCompare) byAge(i, j int) bool {
-	return emp.Employee[i].Age < emp.Employee[j].Age
+func byAge(first *Employee, second *Employee) bool {
+	return first.Age < second.Age
 }
 
-func (emp *EmployeeCompare) byName(i, j int) bool {
-	return emp.Employee[i].Name < emp.Employee[j].Name
+func byName(first *Employee, second *Employee) bool {
+	return first.Name < second.Name
 }
 
 func main() {
@@ -46,23 +46,22 @@ func main() {
 	}
 
 	fmt.Println("Sorting by age")
-	sortEmployee(employees, (*EmployeeCompare).byAge)
+	sortEmployee(employees, byAge)
 
 	fmt.Println("Sorting by name")
-	sortEmployee(employees, (*EmployeeCompare).byName)
+	sortEmployee(employees, byName)
 
 	fmt.Println("Sorting by age then name")
-	sortEmployee(employees, func(emp *EmployeeCompare, i, j int) bool {
-		if emp.Employee[i].Age != emp.Employee[j].Age {
-			return emp.Employee[i].Age < emp.Employee[j].Age
+	sortEmployee(employees, func(first *Employee, second *Employee) bool {
+		if first.Age != second.Age {
+			return first.Age < second.Age
 		}
-
-		return emp.Employee[i].Name < emp.Employee[j].Name
+		return first.Name < second.Name
 	})
 
 }
 
-func sortEmployee(employees []*Employee, comparator func(empCompare *EmployeeCompare, i, j int) bool) {
+func sortEmployee(employees []*Employee, comparator func(first, second *Employee) bool) {
 
 	comparable := EmployeeCompare{comparator, employees}
 
